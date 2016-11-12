@@ -41,9 +41,9 @@ public class App
     	
     	ControllerInfo c = new ControllerInfo();
     	c.setAccount("customer1");
-    	c.setUser("pablo");
-    	c.setPass("Teto4958");
-    	c.setUrl("http://dev.demo.appdynamics.com");
+    	c.setUser("");
+    	c.setPass("");
+    	c.setUrl("http://appdynamics.com");
     	ControllerClient cC=new ControllerClient(c);
     	try
     	{
