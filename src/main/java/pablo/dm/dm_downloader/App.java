@@ -1,18 +1,19 @@
 package pablo.dm.dm_downloader;
 
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.log4j.Logger;
 import java.io.*;
 
 import pablo.dm.dm_downloader.Controller.*;
+import pablo.dm.dm_downloader.Exceptions.SnapshotNotFound;
 import pablo.dm.objects.*;
-import pablo.dm.objects.BTSegmentList;
 import pablo.dm.objects.BTSnapshot;
-import pablo.dm.objects.CallGraph;
-import pablo.dm.objects.CallGraphNode;
 import pablo.dm.objects.RangeSpecifierBeforeNow;
 import pablo.dm.objects.SnapshotSearchCriteria;
-import pablo.dm.dm_downloader.utils.*;
 import java.time.*;
+import java.util.ArrayList;
 
 /**
  * Hello world!
@@ -20,30 +21,25 @@ import java.time.*;
  */
 public class App 
 {
+	public static BTSnapshot getSnap() throws ConfigurationException, ClassNotFoundException, SnapshotNotFound, IOException{
+
+    	MongoSnapshotSource f = new MongoSnapshotSource();
+    	return f.RetrieveSnapshot("51ffff4d-536d-4f21-a47e-cf26f62731ec");
+    	
+	}
+	
     public static void main( String[] args ) throws Exception
     {
     	final Logger log = Logger.getLogger(App.class.getName());
-    	final String path=".\\Snapshots\\";
-
-    	ZonedDateTime t = ZonedDateTime.now().minusDays(1);
-    	ZonedDateTime t2=t.minusDays(1);
-    	RangeSpecifierBetweenTimes rs = new RangeSpecifierBetweenTimes(t2,t);
-    	String j = rs.toJSON();
-    	
-    	SnapshotSearchCriteria c1 = new SnapshotSearchCriteria();
-    	c1.firstInChain=true;
-    	c1.maxRows=10;
-    	c1.applicationIds=new int[]{6};
-    	c1.rangeSpecifier=rs;
-    	//c1.rangeSpecifier=new RangeSpecifierBeforeNow(1440);
-    	System.out.println(c1.toJSON());
-    	
+    	Configurations configs = new Configurations();
+    	Configuration config = configs.properties(new File("./Resources/config.properties"));
     	
     	ControllerInfo c = new ControllerInfo();
-    	c.setAccount("customer1");
-    	c.setUser("");
-    	c.setPass("");
-    	c.setUrl("http://appdynamics.com");
+    	c.setAccount(config.getString("controller.account"));
+    	c.setUser(config.getString("controller.user"));
+    	c.setPass(config.getString("controller.password"));
+    	c.setUrl(config.getString("controller.url"));
+    	final String path=config.getString("snapshots.path");
     	ControllerClient cC=new ControllerClient(c);
     	try
     	{
@@ -51,24 +47,46 @@ public class App
     	}
     	catch (Exception e)
     	{}
-    	
-    	BTSegmentList list = cC.GetBTSnapshotList(c1);
-    	
-    	BTSnapshot bt = cC.GetBTSnapshot("ef1770a7-0d0a-44cb-9292-cc489d88df32", true);
+//
+//    	BTSnapshot bt = cC.GetBTSnapshot("ef1770a7-0d0a-44cb-9292-cc489d88df32", true);
+//
+//    	bt.SerializeToFile(path + bt.guid + ".snapshot" );
 
-    	bt.SerializeToFile(path + bt.guid + ".ser" );
+    	SnapshotSearchCriteria c1 = new SnapshotSearchCriteria();
+    	c1.firstInChain=true;
+    	c1.maxRows=50;
+    	c1.applicationIds=new int[]{6};
+    	//c1.rangeSpecifier=rs;
+    	c1.rangeSpecifier=new RangeSpecifierBeforeNow(60);
+    	c1.businessTransactionIds= new int[]{38};
     	
-    	BTSnapshot bt2 = BTSnapshot.FactoryDeserializeFromFile(path + bt.guid + ".ser");
-    	bt2.SerializeToFile(path + "bt2");
-        
+    	SnapshotSearchCriteria c2 = new SnapshotSearchCriteria();
+    	c2.firstInChain=true;
+    	c2.maxRows=50;
+    	c2.applicationIds=new int[]{6};
+    	//c1.rangeSpecifier=rs;
+    	ZonedDateTime start =  ZonedDateTime.now().minusMinutes(60);
+    	ZonedDateTime end = ZonedDateTime.now().minusMinutes(10);
+    	c2.rangeSpecifier=new RangeSpecifierBetweenTimes(start, end );
+    	c2.businessTransactionIds= new int[]{38};
+
+    	ControllerSnapshotSource s = new ControllerSnapshotSource(c);
+    	MongoSnapshotSource f = new MongoSnapshotSource();
+
+    	ArrayList<BTSnapshot> snaps = f.SearchFullSnapshots(c2);
     	
-    	String URL = "https://paypalnodejs1.saas.appdynamics.com/controller/restui/snapshot/snapshotListDataWithFilterHandle";
-    	//String Data = c1.toJSON();
-    	//String res=cC.Post(URL, Data,"application/json;charset=UTF-8");
+//    	BTSnapshot r = s.RetrieveSnapshot("ef1770a7-0d0a-44cb-9292-cc489d88df32");
+//    	r = s.RetrieveSnapshot("ef1770a7-0d0a-44cb-9292-cc489d88df3");
+    	SnapshotManager sm = new SnapshotManager(s,f);
     	
-    	//System.out.println(Data);
-    	//System.out.println(res);
+    	BTSnapshot snap = sm.RetrieveSnapshot("51ffff4d-536d-4f21-a47e-cf26f62731ec");
+    	sm.SaveSnapshot(snap);
+    	BTSnapshot s2 = sm.RetrieveSnapshot("51ffff4d-536d-4f21-a47e-cf26f62731ec");
     	
-    	//System.out.println( cC.Get("https://paypalnodejs1.saas.appdynamics.com/controller/restui/home/getAllAppPerformanceViewData?time-range=last_15_minutes.BEFORE_NOW.-1.-1.15&filter=incidentSummary"));
+    	BTSnapshot bt = cC.GetBTSnapshot("00d61112-32a4-4a3e-b86d-078f74abbca1", true);
+
+    	
+    	sm.DownloadSnapshotsFromRemoteSource(c1);
+
      }
 }

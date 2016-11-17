@@ -1,6 +1,10 @@
 package pablo.dm.objects;
 
 public class CallGraphNode extends BaseObject {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2659956575886285825L;
 	public String type;
 	public String name;
 	public String[] names;
@@ -15,13 +19,14 @@ public class CallGraphNode extends BaseObject {
 	public int timeSpentInMilliSec;
 	public String properties;
 	public CallGraphNode[] children;
-	public ExitCalls[] exitCalls;
+	public ExitCall[] exitCalls;
 	public int blockTime;
 	public int waitTime;
 	public int[] serviceEndPointIds;
 	public LockArray[] lockArray;
 	public int cpuTime;
 	public CallGraph parentCallGraph;
+	public CallGraphNode[] triggeredNodes;
 	
 	public void CalculateTimings(){
 		childrenTime=0;

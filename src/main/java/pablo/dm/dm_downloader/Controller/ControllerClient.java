@@ -14,9 +14,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 
-import pablo.dm.dm_downloader.App;
-import pablo.dm.dm_downloader.Controller.Exceptions.ControllerAuthException;
-import pablo.dm.dm_downloader.Controller.Exceptions.ControllerException;
+import pablo.dm.dm_downloader.Exceptions.ControllerAuthException;
+import pablo.dm.dm_downloader.Exceptions.ControllerException;
 import pablo.dm.dm_downloader.utils.Utils;
 import pablo.dm.objects.*;
 
@@ -39,6 +38,10 @@ public class ControllerClient {
 		cInfo=ControllerIn;
 		AuthHeader="Basic " + Utils.EncodeStringBase64(cInfo.getUser() + "@" + cInfo.getAccount() + ":" + cInfo.getPass() );
 		client = HttpClientBuilder.create().build();
+	}
+	
+	public String toString(){
+		return cInfo.getUrl();
 	}
 	
 	public void Authenticate () throws IOException, ControllerException
@@ -126,14 +129,14 @@ public class ControllerClient {
 		return retVal;
 	}
 
-	public BTSegmentDescriptor[] GetDetailedSegmentList(SnapshotSearchCriteria criteria, boolean GetCallGraph) throws ControllerException, IOException
+	public BTSegment[] GetDetailedSegmentList(SnapshotSearchCriteria criteria, boolean GetCallGraph) throws ControllerException, IOException
 	{
 		String url = this.cInfo.getUrl()+this.AllSegmentsForGuidURI;
 		String json = Post(url,criteria.toJSON(),"application/json;charset=UTF-8");
 		log.trace("Detailed Segment List for URL: " + url + "::::::" + json);
-		BTSegmentDescriptor[] retVal = (BTSegmentDescriptor[])BTSegmentList.FactoryFromJSON(json, BTSegmentDescriptor[].class);
+		BTSegment[] retVal = (BTSegment[])BTSegmentList.FactoryFromJSON(json, BTSegment[].class);
 		if (retVal != null){
-			for (BTSegmentDescriptor seg:retVal){
+			for (BTSegment seg:retVal){
 				if (GetCallGraph){
 					seg.callGraph=GetSegmentCallGraph(seg.id,seg.serverStartTime);
 				}
@@ -143,13 +146,13 @@ public class ControllerClient {
 		return retVal;
 	}
 	
-	public BTSegmentDescriptor GetSegment(long rsdId, long timestamp, boolean GetCallGraph) throws IOException, ControllerException{
+	public BTSegment GetSegment(long rsdId, long timestamp, boolean GetCallGraph) throws IOException, ControllerException{
 		String url = this.cInfo.getUrl()+ SegmentDetailsURI;
 		url += "?rsdId=" + rsdId + "&timeRange=Custom_Time_Range.BETWEEN_TIMES."
 				+ (timestamp) + "." + (timestamp-3600000) + ".60";
 		String json = Get(url,"application/json;charset=UTF-8");
 		log.trace("Segment Details for URL: " + url + "::::::" + json);
-		BTSegmentDescriptor retVal = (BTSegmentDescriptor)BTSegmentDescriptor.FactoryFromJSON(json, BTSegmentDescriptor.class);
+		BTSegment retVal = (BTSegment)BTSegment.FactoryFromJSON(json, BTSegment.class);
 		if (GetCallGraph){
 			retVal.callGraph = GetSegmentCallGraph(rsdId,timestamp);
 		}

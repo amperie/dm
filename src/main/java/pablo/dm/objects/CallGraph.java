@@ -3,24 +3,28 @@ package pablo.dm.objects;
 import java.util.HashMap;
 
 public class CallGraph extends BaseObject {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2653986127860103677L;
 	public CallGraphNode[] roots;
-	public HashMap<String,ExitCalls> CallGraphExitIDs;
-	public BTSegmentDescriptor parentSegment;
+	public HashMap<String,ExitCall> CallGraphExitIDs;
+	public BTSegment parentSegment;
 	
 	private void RecurseAllNodes(CallGraphNode node){
-		HashMap<String,ExitCalls> tmpMap;
+		HashMap<String,ExitCall> tmpMap;
 		
 		//Put stuff to do for each node here
 		node.CalculateTimings();
 		node.parentCallGraph=this;
-		tmpMap = ExtractExitSequence(node);
+		tmpMap = ExtractExitCalls(node);
 		CallGraphExitIDs.putAll(tmpMap);
 		if (node.exitCalls != null){
-			for (ExitCalls ec:node.exitCalls){
+			for (ExitCall ec:node.exitCalls){
 				ec.parentNode=node;
 			}
 		}
-		//Finish
+		//Finish stuff to do for each node
 		if (node.children != null){
 			for (CallGraphNode child : node.children){
 					RecurseAllNodes(child);
@@ -29,17 +33,17 @@ public class CallGraph extends BaseObject {
 	}
 	
 	public void PostProcess(){
-		CallGraphExitIDs = new HashMap<String,ExitCalls>();
+		CallGraphExitIDs = new HashMap<String,ExitCall>();
 		for (CallGraphNode rootNode : roots){
 			RecurseAllNodes(rootNode);
 		}
 	}
 	
-	private HashMap<String,ExitCalls> ExtractExitSequence(CallGraphNode node){
+	private HashMap<String,ExitCall> ExtractExitCalls(CallGraphNode node){
 		
-		HashMap<String,ExitCalls> retVal = new HashMap<String,ExitCalls>();
+		HashMap<String,ExitCall> retVal = new HashMap<String,ExitCall>();
 		if (node.exitCalls != null){
-			for (ExitCalls ec : node.exitCalls){
+			for (ExitCall ec : node.exitCalls){
 				retVal.put(ec.snapshotSequenceCounter, ec);
 			}
 		}

@@ -1,6 +1,10 @@
 package pablo.dm.objects;
 
 public class SnapshotSearchCriteria extends BaseObject {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4092856512635698609L;
 	public boolean firstInChain;
 	public int maxRows=600;
 	public int[] applicationIds;
