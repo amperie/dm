@@ -19,25 +19,25 @@ public class SnapshotManager implements Runnable {
 
 	final Logger log = Logger.getLogger(App.class.getName());
 	private final int THREADPOOL_SIZE=5;
-	private ArrayList<SnapshotSourceBase> snapshotLocalSourceChain = new ArrayList<SnapshotSourceBase>();
+	private ArrayList<SnapshotStoreBase> snapshotLocalSourceChain = new ArrayList<SnapshotStoreBase>();
 	private ConcurrentHashMap<String,BTSnapshot> snapshotMap = new ConcurrentHashMap<String,BTSnapshot>();
-	private SnapshotSourceBase remoteReadSource=null;
-	private SnapshotSourceBase primaryWriteSource=null;
+	private SnapshotStoreBase remoteReadSource=null;
+	private SnapshotStoreBase primaryWriteSource=null;
 	public int NumberOfSnapshotsToKeepInMemory=-1; //-1 means keep all
 	ExecutorService executor = Executors.newFixedThreadPool(THREADPOOL_SIZE);
 	private ConcurrentLinkedQueue<BTSegment> retrievalQueue = new ConcurrentLinkedQueue<BTSegment>();
 
 
-	public SnapshotManager (SnapshotSourceBase primaryReadSource, SnapshotSourceBase primaryWriteSource){
+	public SnapshotManager (SnapshotStoreBase primaryReadSource, SnapshotStoreBase primaryWriteSource){
 		this.remoteReadSource=primaryReadSource;
 		this.primaryWriteSource=primaryWriteSource;
 	}
 	
-	public ArrayList<SnapshotSourceBase> getSnapshotSourceChain() {
+	public ArrayList<SnapshotStoreBase> getSnapshotSourceChain() {
 		return snapshotLocalSourceChain;
 	}
 
-	public void AddSnapshotSource(SnapshotSourceBase source){
+	public void AddSnapshotSource(SnapshotStoreBase source){
 		snapshotLocalSourceChain.add(source);
 		Collections.sort(snapshotLocalSourceChain);
 	}
@@ -59,8 +59,8 @@ public class SnapshotManager implements Runnable {
 		
 		BTSegmentList searchRes = remoteReadSource.SearchSnapshotSegments(criteria);
 		for (BTSegment seg:searchRes.requestSegmentDataListItems){
-			//Check if the snapshot is already in memory or stored locally
-			if (!snapshotMap.containsKey(seg.requestGUID) && !SnapshotExistsLocally(seg.requestGUID)){
+			//Check if the snapshot is already stored locally
+			if (!SnapshotExistsLocally(seg.requestGUID)){
 				retrievalQueue.add(seg);
 			}
 		}
@@ -77,7 +77,7 @@ public class SnapshotManager implements Runnable {
 	
 	public boolean SnapshotExistsLocally(String guid) throws ControllerException, IOException {
 		//First check the Source chain
-		for (SnapshotSourceBase source:snapshotLocalSourceChain){
+		for (SnapshotStoreBase source:snapshotLocalSourceChain){
 			if (source.SnapshotExists(guid)) return true; 
 		}
 		//Then check the primary write source
@@ -102,7 +102,7 @@ public class SnapshotManager implements Runnable {
 			return retVal;
 		}
 		//check the Source chain
-		for (SnapshotSourceBase source:snapshotLocalSourceChain){
+		for (SnapshotStoreBase source:snapshotLocalSourceChain){
 			if (source.SnapshotExists(guid)) {
 				try {
 					retVal = source.RetrieveSnapshot(guid);

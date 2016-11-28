@@ -15,17 +15,17 @@ import pablo.dm.objects.BTSegmentList;
 import pablo.dm.objects.BTSnapshot;
 import pablo.dm.objects.SnapshotSearchCriteria;
 
-public class FileSystemSnapshotSource extends SnapshotSourceBase implements ISnapshotSource {
+public class FileSystemSnapshotStore extends SnapshotStoreBase implements ISnapshotStore {
 
 	public String rootPath="./Snapshots/";
 	private final String fileExtension=".snapshot";
 	
-	public FileSystemSnapshotSource() throws ConfigurationException{
+	public FileSystemSnapshotStore() throws ConfigurationException{
 		super();
 		SetConfiguration();
 	}
 	
-	public FileSystemSnapshotSource(String dataDirectory){
+	public FileSystemSnapshotStore(String dataDirectory){
 		super();
 		if (dataDirectory.substring(Math.max(dataDirectory.length() - 1, 0)) != "/") dataDirectory+="/";
 		rootPath=dataDirectory;

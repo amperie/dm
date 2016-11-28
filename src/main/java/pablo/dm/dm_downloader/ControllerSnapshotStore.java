@@ -13,11 +13,11 @@ import pablo.dm.objects.BTSnapshot;
 import pablo.dm.objects.RangeSpecifierBeforeNow;
 import pablo.dm.objects.SnapshotSearchCriteria;
 
-public class ControllerSnapshotSource extends SnapshotSourceBase implements ISnapshotSource {
+public class ControllerSnapshotStore extends SnapshotStoreBase implements ISnapshotStore {
 
 	private ControllerClient cClient;
 	
-	public ControllerSnapshotSource(ControllerInfo controllerInf){
+	public ControllerSnapshotStore(ControllerInfo controllerInf){
     	cClient=new ControllerClient(controllerInf);
     	try
     	{

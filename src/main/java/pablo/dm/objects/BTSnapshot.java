@@ -79,19 +79,6 @@ public class BTSnapshot extends BaseObject {
 				SnapshotGraph.add(tmpPair);
 			}
 		}
-		
-//		for (SegmentTriggerCall trigger:triggerCalls.values()){
-//			if (trigger != null){
-//				x+=1;
-//				//Find the snapshotSequence that matches the triggerCall to the right exit call
-//				tmpPair=new CallGraphNodePair();
-//				tmpPair.toNode=trigger.parentSegment.callGraph.roots[0];
-//				tmpPair.fromNode=SnapshotCallGraphExitIDs.get(trigger.snapshotSequenceCounter).parentNode;
-//				tmpPair.PairID=x;
-//				tmpPair.SequenceCounter=trigger.snapshotSequenceCounter;
-//				SnapshotGraph.add(tmpPair);
-//			}
-//		}
 		Collections.sort(SnapshotGraph);
 	}
 	

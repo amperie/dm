@@ -14,6 +14,7 @@ public class CallGraphNode extends BaseObject {
 	public boolean loop;
 	public int loopCount;
 	public int selfTime;
+	public int selfTimeWithExitCalls;
 	public int childrenTime;
 	public int totalTime;
 	public int timeSpentInMilliSec;
@@ -37,6 +38,12 @@ public class CallGraphNode extends BaseObject {
 			}
 		}
 		selfTime = totalTime - childrenTime;
+		selfTimeWithExitCalls = selfTime;
+		if (exitCalls != null){
+			for (ExitCall exit: exitCalls){
+				selfTimeWithExitCalls -= exit.timeTakenInMillis;
+			}
+		}
 	}
 	
 }

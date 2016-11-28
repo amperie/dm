@@ -27,7 +27,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
-public class MongoSnapshotSource extends SnapshotSourceBase implements ISnapshotSource {
+public class MongoSnapshotSource extends SnapshotStoreBase implements ISnapshotStore {
 
 	private MongoClient mng;
 	private String mngHost;
@@ -35,8 +35,8 @@ public class MongoSnapshotSource extends SnapshotSourceBase implements ISnapshot
 	private String mngSnapshotDB;
 	private String mngSnapshotCollection;
 	private MongoDatabase mngDB;
-	private MongoCollection mngColl;
-	private FileSystemSnapshotSource fs;
+	private MongoCollection<Document> mngColl;
+	private FileSystemSnapshotStore fs;
 	
 	public MongoSnapshotSource() throws ConfigurationException{
 		super();
@@ -53,7 +53,7 @@ public class MongoSnapshotSource extends SnapshotSourceBase implements ISnapshot
     	mngSnapshotDB=config.getString("snapshots.mongoSnapshotDB");
     	mngSnapshotCollection=config.getString("snapshots.mongoSnapshotCollection");
     	mngPort=Integer.parseInt(config.getString("snapshots.mongoPort"));
-		fs=new FileSystemSnapshotSource(config.getString("snapshots.path"));
+		fs=new FileSystemSnapshotStore(config.getString("snapshots.path"));
 	}
 	
 	@Override

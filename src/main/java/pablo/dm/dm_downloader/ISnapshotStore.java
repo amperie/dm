@@ -8,7 +8,7 @@ import pablo.dm.dm_downloader.Exceptions.SnapshotNotFound;
 import pablo.dm.dm_downloader.Exceptions.UnsupportedOperation;
 import pablo.dm.objects.*;
 
-public interface ISnapshotSource {
+public interface ISnapshotStore {
 	public boolean SnapshotExists(String guid) throws ControllerException, IOException;
 	public BTSnapshot RetrieveSnapshot(String guid)  throws ClassNotFoundException, IOException, SnapshotNotFound, ControllerException;
 	public String SaveSnapshot(BTSnapshot snapshot) throws UnsupportedOperation, IOException;
